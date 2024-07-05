@@ -30,7 +30,7 @@ router.post(
   check('description').notEmpty().exists().isString().withMessage("description is required"),
   validateFields.checkV2,
 ],
-  (req: Request, res: Response, next: NextFunction) =>
+  (req: Request, res: Response,) =>
     controller.add(req, res)
 );
 
@@ -38,7 +38,7 @@ router.delete(
   "/:id", [
   authMiddleware,
 ],
-  (req: Request, res: Response, next: NextFunction) =>
+  (req: Request, res: Response) =>
     controller.delete(req, res)
 );
 
