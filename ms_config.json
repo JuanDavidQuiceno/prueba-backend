@@ -1,0 +1,31 @@
+{
+    "app": {
+        "name": "prueba-back-end",
+        "version": "1.0.0"
+    },
+    "config": {
+        "install_dependencies": false,
+        "create_folder": true,
+        "create_documentation": true
+    },
+    "migrate": {
+        "host": "127.0.0.1",
+        "database": "prueba_video",
+        "user": "root",
+        "password": true,
+        "primaryKeyIdUUID": true,
+        "ignore": [],
+        "include": []
+    },
+    "environment": {
+        "local": {
+            "host": "localhost",
+            "port": 4000,
+            "port_db": 3306,
+            "host_db": "127.0.0.1",
+            "db_name": "prueba_video",
+            "user_db": "root",
+            "pass_db": "12345678"
+        }
+    }
+}

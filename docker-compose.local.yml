@@ -1,0 +1,15 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: prueba-back-end_image
+    restart: always
+    ports:
+      - 4000:4000
+    environment:
+      ENV: local
+    working_dir: /app
+    volumes:
+      - ./:/app
