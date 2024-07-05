@@ -140,11 +140,53 @@ export class Controller {
     }
   }
 
-  // async update(req: Request, res: Response, next: NextFunction) {
-  //   new Utils().update(req, res, next, VideosModel());
-  // }
+  async delete(req: any, res: Response) {
 
-  async delete(req: Request, res: Response, next: NextFunction) {
-    new Utils().delete(req, res, next, VideosModel());
+    const language = res.locals.language;
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+
+      const video = await VideosModel().findByPk(id);
+
+      if (!video) {
+        return res.status(404).json(new ErrorClass(
+          language === 'en'
+            ? `The requested resource with id ${id} was not found`
+            : language === 'fr'
+              ? `La ressource demandée avec l'identifiant ${id} n'a pas été trouvée`
+              : `No se encuentra el recurso solicitado con el id ${id}`
+        ));
+      }
+
+      if (video.dataValues.user_id !== userId) {
+        return res.status(401).json(new ErrorClass(
+          language === 'en'
+            ? `You are not authorized to delete this resource`
+            : language === 'fr'
+              ? `Vous n'êtes pas autorisé à supprimer cette ressource`
+              : `No tienes permisos para eliminar este recurso`
+        ));
+      }
+
+      await VideosModel().update({ active: false }, { where: { id } });
+
+      return res.status(200).json(new SuccessClass(
+        language === 'en'
+          ? `Resource with id ${id} successfully deleted`
+          : language === 'fr'
+            ? `Ressource avec id ${id} supprimée avec succès`
+            : `Recurso con id ${id} eliminado correctamente`
+      ));
+
+    } catch (error: any) {
+
+      if (error.message) {
+        return res.status(400).json(new ErrorClass('Error controlado auth', error.message));
+      }
+      else {
+        return res.status(500).json(new ErrorClass('Error controlado auth,', error),);
+      }
+    }
   }
 }

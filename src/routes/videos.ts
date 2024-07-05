@@ -39,7 +39,7 @@ router.delete(
   authMiddleware,
 ],
   (req: Request, res: Response, next: NextFunction) =>
-    controller.delete(req, res, next)
+    controller.delete(req, res)
 );
 
 export default router;
