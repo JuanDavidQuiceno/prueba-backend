@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import UsersModel, { IUsers, UserRelations } from "../models/users";
-import { ErrorClass, SuccessClass } from "../helper/default_class";
 import { DataLanguage } from "../helper/language";
 import { Model, Sequelize, Transaction } from "sequelize";
 import { CustomToken } from "../helper/custom_token";
@@ -18,34 +17,34 @@ export class AuthController {
                 attributes: { exclude: UserRelations.exclude }
             });
             if (!userAuth) {
-                return res.status(400).json(new ErrorClass(
-                    language === DataLanguage.en
-                        ? 'We have a problem, try again later'
+                return res.status(400).json({
+                    message: language === DataLanguage.en
+                        ? 'Controlled error user data'
                         : language === DataLanguage.fr
-                            ? 'Nous avons un problème, réessayez plus tard'
-                            : 'Tenemos un problema, intente más tarde'
-                ));
+                            ? 'Erreur contrôlée user data'
+                            : 'Usuario no encontrado'
+                });
             }
             return res.status(200).json(userAuth);
         } catch (error: any) {
             // Si hay error
             if (error.message) {
-                return res.status(400).json(new ErrorClass(
-                    language === DataLanguage.es
-                        ? 'Error controlado user data: ' + error
-                        : language === DataLanguage.fr
-                            ? 'Erreur contrôlée user data: ' + error
-                            : 'Controlled error user data: ' + error
-                ));
-            }
-            else {
-                return res.status(500).json(new ErrorClass(
-                    language === DataLanguage.es
+                return res.status(400).json({
+                    message: language === DataLanguage.es
                         ? 'Error controlado user data'
                         : language === DataLanguage.fr
                             ? 'Erreur contrôlée user data'
                             : 'Controlled error user data'
-                ),);
+                });
+            }
+            else {
+                return res.status(500).json({
+                    message: language === DataLanguage.es
+                        ? 'Error controlado user data'
+                        : language === DataLanguage.fr
+                            ? 'Erreur contrôlée user data'
+                            : 'Controlled error user data'
+                });
             }
         }
 
@@ -68,17 +67,14 @@ export class AuthController {
 
             // Si no existe el usuario
             if (!user) {
-                return res.status(404).json(
-                    new ErrorClass(
-                        {
-                            title: 'Error title',
-                            content: language === DataLanguage.es
-                                ? 'Aún no tienes una cuenta, regístrate'
-                                : language === DataLanguage.fr
-                                    ? 'Vous n\'avez pas encore de compte, inscrivez-vous'
-                                    : 'You do not have an account yet, sign up',
-                        }
-                    ),
+                return res.status(404).json({
+                    title: 'Error title',
+                    message: language === DataLanguage.en
+                        ? 'You do not have an account yet, sign up'
+                        : language === DataLanguage.fr
+                            ? 'Vous n\'avez pas encore de compte, inscrivez-vous'
+                            : 'Aún no tienes una cuenta, regístrate',
+                }
                 );
             }
             // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -87,34 +83,31 @@ export class AuthController {
             const compare = bcrypt.compareSync(body.password, user.dataValues.password);
 
             if (!compare) {
-                return res.status(404).json(
-                    new ErrorClass(
-                        {
-                            title: 'Error title',
-                            content: language === DataLanguage.es
-                                ? 'Correo o contraseña incorrecta. Vuelve a intentarlo o selecciona\n"¿Has olvidado tu contraseña?"'
-                                : language === DataLanguage.fr
-                                    ? 'Email ou mot de passe incorrect. Réessayer ou sélectionner\n"Mot de passe oublié?"'
-                                    : 'Incorrect email or password. Try again or select\n"Forgot your password?"',
-                        }
-                    ),
+                return res.status(404).json({
+                    title: 'Error title',
+                    message: language === DataLanguage.en
+                        ? 'Incorrect email or password. Try again or select\n"Forgot your password?"'
+                        : language === DataLanguage.fr
+                            ? 'Email ou mot de passe incorrect. Réessayer ou sélectionner\n"Mot de passe oublié?"'
+                            : 'Correo o contraseña incorrecta.'
+                }
                 );
             }
 
             // Si no existe el usuario
             if (!compare) {
-                return res.status(404).json(new ErrorClass(
-                    language === DataLanguage.es
+                return res.status(404).json({
+                    title: language === DataLanguage.es
                         ? 'Error al iniciar sesión'
                         : language === DataLanguage.fr
                             ? 'Erreur de connexion'
                             : 'Login error',
-                    language === DataLanguage.es
+                    message: language === DataLanguage.es
                         ? 'Correo o contraseña incorrecta. Vuelve a intentarlo o selecciona\n"¿Has olvidado tu contraseña?"'
                         : language === DataLanguage.fr
                             ? 'Email ou mot de passe incorrect. Réessayer ou sélectionner\n"Mot de passe oublié?"'
                             : 'Incorrect email or password. Try again or select\n"Forgot your password?"',
-                ));
+                });
             }
 
             const userAuth = await UsersModel().findOne({
@@ -130,10 +123,10 @@ export class AuthController {
         } catch (error: any) {
             // Si hay error
             if (error.message) {
-                return res.status(400).json(new ErrorClass('Error controlado auth', error.message));
+                return res.status(400).json({ message: 'Error controlado auth', error: error.message });
             }
             else {
-                return res.status(500).json(new ErrorClass('Error controlado auth,', error),);
+                return res.status(500).json({ message: 'Error controlado auth,', error: error });
             }
         }
     }
@@ -155,14 +148,13 @@ export class AuthController {
             );
 
             if (userExiste) {
-                return res.status(400).json(
-                    new ErrorClass(language === DataLanguage.es
+                return res.status(400).json({
+                    message: language === DataLanguage.es
                         ? 'El correo ya se encuentra registrado'
                         : language === DataLanguage.fr
                             ? 'L\'email est déjà enregistré'
                             : 'The email is already registered',
-                    )
-                );
+                });
             }
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const bcrypt = require("bcryptjs");
@@ -182,26 +174,25 @@ export class AuthController {
             // Commit transaction
             await transaction.commit();
 
-            return res.status(200).json(
-                new SuccessClass(language === DataLanguage.es
+            return res.status(200).json({
+                message: language === DataLanguage.es
                     ? 'Usuario registrado correctamente'
                     : language === DataLanguage.fr
                         ? 'Utilisateur enregistré avec succès'
                         : 'User registered successfully',
-                )
-            );
+            });
 
         } catch (error: any) {
 
             //rollback si hay error a la transaccion
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             if (transaction!) await transaction?.rollback().catch(() => null);
-
+            // Si hay error
             if (error.message) {
-                return res.status(400).json(new ErrorClass('Error controlado auth', error.message));
+                return res.status(400).json({ message: 'Error controlado auth', error: error.message });
             }
             else {
-                return res.status(500).json(new ErrorClass('Error controlado auth,', error),);
+                return res.status(500).json({ message: 'Error controlado auth,', error: error });
             }
         }
     }

@@ -4,7 +4,6 @@ import { Response, Request, NextFunction } from "express";
 import { Utils } from "../helper/utils";
 import VideosModel from "../models/videos";
 import { TypeFilterLoadHelper } from "../helper/type_filter_load_helper";
-import { ErrorClass, SuccessClass } from "../helper/default_class";
 import { AwsUpload } from "../helper/aws_document";
 
 export class Controller {
@@ -53,7 +52,7 @@ export class Controller {
             page,
           },
         };
-        return res.status(200).json(new SuccessClass('', response));
+        return res.status(200).json(response);
       }
     } catch (error) {
       return new Utils().errorCatch(error, next, res);
@@ -131,11 +130,12 @@ export class Controller {
       });
     } catch (error: any) {
 
+      // Si hay error
       if (error.message) {
-        return res.status(400).json(new ErrorClass('Error controlado auth', error.message));
+        return res.status(400).json({ message: 'Error controlado auth', error: error.message });
       }
       else {
-        return res.status(500).json(new ErrorClass('Error controlado auth,', error),);
+        return res.status(500).json({ message: 'Error controlado auth,', error: error });
       }
     }
   }
@@ -150,42 +150,44 @@ export class Controller {
       const video = await VideosModel().findByPk(id);
 
       if (!video) {
-        return res.status(404).json(new ErrorClass(
-          language === 'en'
+        return res.status(404).json({
+          message: language === 'en'
             ? `The requested resource with id ${id} was not found`
             : language === 'fr'
               ? `La ressource demandée avec l'identifiant ${id} n'a pas été trouvée`
               : `No se encuentra el recurso solicitado con el id ${id}`
-        ));
+        });
       }
 
       if (video.dataValues.user_id !== userId) {
-        return res.status(401).json(new ErrorClass(
-          language === 'en'
+        return res.status(401).json({
+          message: language === 'en'
             ? `You are not authorized to delete this resource`
             : language === 'fr'
               ? `Vous n'êtes pas autorisé à supprimer cette ressource`
               : `No tienes permisos para eliminar este recurso`
-        ));
+        });
       }
 
       await VideosModel().update({ active: false }, { where: { id } });
 
-      return res.status(200).json(new SuccessClass(
-        language === 'en'
+      return res.status(200).json({
+
+        message: language === 'en'
           ? `Resource with id ${id} successfully deleted`
           : language === 'fr'
             ? `Ressource avec id ${id} supprimée avec succès`
             : `Recurso con id ${id} eliminado correctamente`
-      ));
+      });
 
     } catch (error: any) {
 
+      // Si hay error
       if (error.message) {
-        return res.status(400).json(new ErrorClass('Error controlado auth', error.message));
+        return res.status(400).json({ message: 'Error controlado auth', error: error.message });
       }
       else {
-        return res.status(500).json(new ErrorClass('Error controlado auth,', error),);
+        return res.status(500).json({ message: 'Error controlado auth,', error: error });
       }
     }
   }
