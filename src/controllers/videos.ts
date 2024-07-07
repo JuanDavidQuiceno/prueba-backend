@@ -1,29 +1,51 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Response, Request, NextFunction } from "express";
 
-import { Utils } from "../helper/utils";
 import VideosModel from "../models/videos";
 import { TypeFilterLoadHelper } from "../helper/type_filter_load_helper";
 import { AwsUpload } from "../helper/aws_document";
+import { Utils } from "../helper/utils";
 
 export class Controller {
   async getAll(req: Request, res: Response, next: NextFunction) {
-    new Utils().getAll(req, res, next, VideosModel(), {
-      where: {
-        active: true
-      },
-      attributes: { exclude: ['active', 'updated_at'] }
-    });
+    try {
+      if (req.query.page === undefined || req.query.limit === undefined) {
+        // solicitar los parametros de paginacion
+        return res.status(400).json({
+          success: false,
+          message: 'page and limit is required'
+        });
+
+      } else {
+        const { page, limit, offset } = new Utils().paginate(req);
+
+        const results = await VideosModel().findAndCountAll({
+          limit,
+          offset,
+          where: {
+            active: true,
+          },
+          attributes: { exclude: ['active', 'user_id', 'updated_at'] },
+          order: [['id', 'DESC']]
+        });
+
+        const response = {
+          result: results,
+          meta: {
+            total: results.count,
+            page,
+          },
+        };
+        return res.status(200).json(response);
+      }
+    } catch (error) {
+      return new Utils().errorCatch(error, next, res);
+    }
+
   }
 
   async getAllMyVideos(req: any, res: Response, next: NextFunction) {
-    // new Utils().getAll(req, res, next, VideosModel(), {
-    //   where: {
-    //     active: true,
-    //     user_id: req.user.id
-    //   },
-    //   attributes: { exclude: ['active', 'updated_at'] }
-    // });
+
     try {
       if (req.query.page === undefined || req.query.limit === undefined) {
         // solicitar los parametros de paginacion
@@ -42,7 +64,9 @@ export class Controller {
             active: true,
             user_id: req.user.id
           },
-          attributes: { exclude: ['active', 'updated_at'] }
+          attributes: { exclude: ['active', 'user_id', 'updated_at'] },
+          //reverse: true
+          order: [['id', 'DESC']]
         });
 
         const response = {
@@ -66,7 +90,6 @@ export class Controller {
   async add(req: any, res: Response) {
 
     const language = res.locals.language; // Obtener el idioma de la solicitud
-
     try {
       // verificamos que el archivo exista con la propiedad image
       if (!req.files) {
@@ -99,8 +122,6 @@ export class Controller {
         }
       });
 
-      const { title, description } = req.body;
-
       // utilizamos rutaLogo para asignarle el valor de la ruta del logo
       const urlVideo = await new AwsUpload().upload({
         nameImage: rutaVideo.originalname,
@@ -109,27 +130,19 @@ export class Controller {
         paramsContentType: rutaVideo.mimetype,
       });
 
-
-      const video = await VideosModel().create(
-        {
-          title,
-          description,
-          user_id: req.user.id,
-          url: urlVideo,
-        },
-        // { transaction }
-      );
-
-      //incluimos la url del video en la respuesta video.dataValues
-      video.dataValues.url = urlVideo;
+      const { title, description } = req.body;
+      await VideosModel().create({
+        title,
+        description,
+        user_id: req.user.id,
+        url: urlVideo,
+      });
 
       return res.status(201).json({
         ok: true,
         message: 'Se guardo correctamente toda la informacion',
-        data: video,
       });
     } catch (error: any) {
-
       // Si hay error
       if (error.message) {
         return res.status(400).json({ message: 'Error controlado auth', error: error.message });
@@ -159,7 +172,10 @@ export class Controller {
         });
       }
 
-      if (video.dataValues.user_id !== userId) {
+      console.log(video.dataValues.user_id, userId);
+      console.log('idVideo', id)
+
+      if (video.dataValues.user_id?.toString() !== userId) {
         return res.status(401).json({
           message: language === 'en'
             ? `You are not authorized to delete this resource`

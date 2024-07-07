@@ -30,20 +30,20 @@ export class AuthController {
             // Si hay error
             if (error.message) {
                 return res.status(400).json({
-                    message: language === DataLanguage.es
-                        ? 'Error controlado user data'
+                    message: language === DataLanguage.en
+                        ? 'Controlled error user data'
                         : language === DataLanguage.fr
                             ? 'Erreur contrôlée user data'
-                            : 'Controlled error user data'
+                            : 'Error controlado user data'
                 });
             }
             else {
                 return res.status(500).json({
-                    message: language === DataLanguage.es
-                        ? 'Error controlado user data'
+                    message: language === DataLanguage.en
+                        ? 'Controlled error user data'
                         : language === DataLanguage.fr
                             ? 'Erreur contrôlée user data'
-                            : 'Controlled error user data'
+                            : 'Error controlado user data'
                 });
             }
         }
@@ -67,7 +67,7 @@ export class AuthController {
 
             // Si no existe el usuario
             if (!user) {
-                return res.status(404).json({
+                return res.status(400).json({
                     title: 'Error title',
                     message: language === DataLanguage.en
                         ? 'You do not have an account yet, sign up'
@@ -83,7 +83,7 @@ export class AuthController {
             const compare = bcrypt.compareSync(body.password, user.dataValues.password);
 
             if (!compare) {
-                return res.status(404).json({
+                return res.status(400).json({
                     title: 'Error title',
                     message: language === DataLanguage.en
                         ? 'Incorrect email or password. Try again or select\n"Forgot your password?"'
@@ -96,17 +96,17 @@ export class AuthController {
 
             // Si no existe el usuario
             if (!compare) {
-                return res.status(404).json({
-                    title: language === DataLanguage.es
-                        ? 'Error al iniciar sesión'
+                return res.status(400).json({
+                    title: language === DataLanguage.en
+                        ? 'Login error'
                         : language === DataLanguage.fr
                             ? 'Erreur de connexion'
-                            : 'Login error',
-                    message: language === DataLanguage.es
-                        ? 'Correo o contraseña incorrecta. Vuelve a intentarlo o selecciona\n"¿Has olvidado tu contraseña?"'
+                            : 'Error al iniciar sesión',
+                    message: language === DataLanguage.en
+                        ? 'Incorrect email or password'
                         : language === DataLanguage.fr
-                            ? 'Email ou mot de passe incorrect. Réessayer ou sélectionner\n"Mot de passe oublié?"'
-                            : 'Incorrect email or password. Try again or select\n"Forgot your password?"',
+                            ? 'Email ou mot de passe incorrect'
+                            : 'Correo o contraseña incorrecta',
                 });
             }
 
@@ -133,6 +133,7 @@ export class AuthController {
 
     async register(req: Request, res: Response) {
         const language = res.locals.language; // Obtener el idioma de la solicitud
+        console.log(language);
         // iniciamos la transaccion
         let transaction: Transaction;
         try {
@@ -149,11 +150,11 @@ export class AuthController {
 
             if (userExiste) {
                 return res.status(400).json({
-                    message: language === DataLanguage.es
-                        ? 'El correo ya se encuentra registrado'
+                    message: language === DataLanguage.en
+                        ? 'The email is already registered'
                         : language === DataLanguage.fr
                             ? 'L\'email est déjà enregistré'
-                            : 'The email is already registered',
+                            : 'El correo ya se encuentra registrado'
                 });
             }
             // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -175,11 +176,11 @@ export class AuthController {
             await transaction.commit();
 
             return res.status(200).json({
-                message: language === DataLanguage.es
-                    ? 'Usuario registrado correctamente'
+                message: language === DataLanguage.en
+                    ? 'User registered successfully'
                     : language === DataLanguage.fr
                         ? 'Utilisateur enregistré avec succès'
-                        : 'User registered successfully',
+                        : 'Usuario registrado correctamente',
             });
 
         } catch (error: any) {
