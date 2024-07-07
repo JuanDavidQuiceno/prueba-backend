@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import UsersModel, { IUsers, UserRelations } from "../models/users";
 import { DataLanguage } from "../helper/language";

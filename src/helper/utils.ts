@@ -98,7 +98,7 @@ export class Utils {
     }
   }
 
-  async add(req: any, res: Response, next: NextFunction, model: any, action: any = {}) {
+  async add(req: any, res: Response, next: NextFunction, model: any) {
     // const { body } = req is Request ?req: req.body;
     // verificar si el req es de tipo Request o es un objeto
     const body = req instanceof Request ? req.body : req;

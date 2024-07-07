@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class TypeFilterLoadHelper {
     // hacer mejora para obtener el tipo de archivo desde el mime type

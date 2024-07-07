@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as jwt from "jsonwebtoken";
 import { Response, NextFunction } from "express";
 import { DataLanguage } from "../helper/language";

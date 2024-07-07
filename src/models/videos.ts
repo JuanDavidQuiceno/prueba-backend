@@ -3,6 +3,7 @@ import { Connection } from "../db/connection";
 
 type includes = '';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const VideosModel = (include?: (includes)[]) => {
 	const model = (Connection.getInstance().db as Sequelize).define<Model<IVideos>>('videos', {
 		id: {
